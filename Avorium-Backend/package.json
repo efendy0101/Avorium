@@ -1,0 +1,45 @@
+{
+  "name": "avorium-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "db:push": "prisma db push",
+    "dev": "nodemon src/index.ts",
+    "make:admin": "node prisma/make-admin.js",
+    "seed": "ts-node prisma/seed.ts",
+    "setup": "npm run db:push && npm run seed",
+    "start": "node dist/src/index.js",
+    "typecheck": "tsc --noEmit",
+    "seed:demo": "ts-node prisma/demo.ts",
+    "test:security": "npm run build && node --test tests/security.test.cjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@prisma/client": "~6.19.3",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "nodemon": "^3.1.14",
+    "prisma": "~6.19.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}

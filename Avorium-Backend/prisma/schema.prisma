@@ -1,0 +1,245 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AdStatus {
+  ACTIVE
+  PASSIVE
+  PENDING_REVIEW
+  SOLD
+}
+
+enum CategoryType {
+  BOAT
+  FISHING_GEAR
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum ReportReason {
+  FAKE_AD
+  WRONG_INFO
+  SPAM
+  INAPPROPRIATE
+  FRAUD
+  OTHER
+}
+
+enum NotificationType {
+  NEW_MESSAGE
+  AD_APPROVED
+  AD_REJECTED
+  AD_EXPIRING
+  PACKAGE_EXPIRING
+  ANNOUNCEMENT
+  SYSTEM
+}
+
+model User {
+  id               String     @id @default(uuid())
+  memberNumber     Int        @unique @default(autoincrement())
+  email            String     @unique
+  password         String?
+  googleId         String?    @unique
+  phone            String?    @unique
+  tcNo             String?    @unique
+  name             String
+  avatar           String?
+  avatarStatus     String     @default("APPROVED") // APPROVED, PENDING, REJECTED
+  pendingAvatar    String?
+  isTcVerified     Boolean    @default(false)
+  isPhoneVerified  Boolean    @default(false)
+  role             Role       @default(USER)
+  isPremium        Boolean    @default(false)
+  remainingAdLimit Int        @default(2)
+  city             String?
+  district             String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  ads              Ad[]
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  orders           Order[]
+  iapOrders        IapOrder[]
+  reports          Report[]
+  notifications    Notification[]
+}
+
+model Category {
+  id       String       @id @default(uuid())
+  name     String
+  type     CategoryType
+  parentId String?
+
+  parent   Category?    @relation("SubCategories", fields: [parentId], references: [id])
+  children Category[]   @relation("SubCategories")
+  ads      Ad[]
+}
+
+model Ad {
+  id          String   @id @default(uuid())
+  adNumber    Int      @unique @default(autoincrement())
+  title       String
+  description String   @db.Text
+  price       Float
+  currency    String   @default("TRY")
+  status      AdStatus @default(PENDING_REVIEW)
+  views       Int      @default(0)
+  videoUrl    String?
+  showPhone   Boolean  @default(false)
+  isUrgent    Boolean  @default(false)
+  editCount   Int      @default(0)
+  city        String?
+  district    String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  images             AdImage[]
+  boatDetails        BoatDetails?
+  fishingGearDetails FishingGearDetails?
+  messages           Message[]
+  reports            Report[]
+}
+
+model AppSettings {
+  id                 String   @id @default("singleton")
+  siteName           String   @default("Avorium")
+  defaultAdLimit     Int      @default(2)
+  adExpiryDays       Int      @default(15)
+  announcementBanner String?
+  maintenanceMode    Boolean  @default(false)
+  updatedAt          DateTime @updatedAt
+}
+
+model AdImage {
+  id     String  @id @default(uuid())
+  url    String
+  isMain Boolean @default(false)
+  adId   String
+  ad     Ad      @relation(fields: [adId], references: [id], onDelete: Cascade)
+}
+
+model BoatDetails {
+  id           String @id @default(uuid())
+  make         String
+  model        String
+  year         Int
+  length       Float
+  hullMaterial String
+  enginePower  Int
+
+  adId String @unique
+  ad   Ad     @relation(fields: [adId], references: [id], onDelete: Cascade)
+}
+
+model FishingGearDetails {
+  id        String @id @default(uuid())
+  condition String
+  brand     String
+  gearType  String
+
+  adId String @unique
+  ad   Ad     @relation(fields: [adId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  senderId   String
+  sender     User   @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId String
+  receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  adId       String
+  ad         Ad     @relation(fields: [adId], references: [id])
+}
+
+model Package {
+  id          String  @id @default(uuid())
+  name        String
+  googleSkuId String? @unique
+  price       Float
+  adLimit     Int
+  features    String?
+
+  orders    Order[]
+  iapOrders IapOrder[]
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  amount    Float
+  status    OrderStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  packageId String
+  package   Package @relation(fields: [packageId], references: [id])
+}
+
+model IapOrder {
+  id            String      @id @default(uuid())
+  purchaseToken String      @unique
+  productId     String
+  orderId       String?     @unique
+  status        OrderStatus @default(PENDING)
+  amount        Float       @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  packageId String
+  package   Package @relation(fields: [packageId], references: [id])
+}
+
+model Report {
+  id        String       @id @default(uuid())
+  reason    ReportReason
+  detail    String?
+  isReviewed Boolean     @default(false)
+  createdAt DateTime     @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  adId   String
+  ad     Ad     @relation(fields: [adId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  title     String
+  body      String
+  isRead    Boolean          @default(false)
+  data      String?
+  createdAt DateTime         @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

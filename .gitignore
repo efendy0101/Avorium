@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+**/node_modules/
+**/dist/
+**/build/
+**/.gradle/
+**/.idea/
+**/.kotlin/
+**/.artifacts/
+**/local.properties
+**/uploads/
+**/tmp/
+**/*.log
+**/*.zip
+.agents/

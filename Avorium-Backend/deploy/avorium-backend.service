@@ -1,0 +1,16 @@
+[Unit]
+Description=Avorium Backend API
+After=network.target
+
+[Service]
+Type=simple
+User=exampleuser
+WorkingDirectory=/home/exampleuser/avorium-backend
+Environment=NODE_ENV=production
+Environment=PORT=5050
+ExecStart=/usr/local/bin/node app.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
