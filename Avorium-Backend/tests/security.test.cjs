@@ -10,6 +10,7 @@ for (const [label, value, success] of [['missing', '', false], ['example', 'repl
   });
 }
 test('unverified purchase is rejected', async () => {
+  process.env.DATABASE_URL ||= 'mysql://test:test@127.0.0.1:33317/test';
   const { verifyPurchase } = require('../dist/src/controllers/iapController');
   let status;
   const res = { status(value) { status = value; return this; }, json() { return this; } };

@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "db:push": "prisma db push",
-    "dev": "nodemon src/index.ts",
-    "make:admin": "node prisma/make-admin.js",
-    "seed": "ts-node prisma/seed.ts",
+    "build": "npm run generate && tsc",
+    "db:push": "npm run generate && prisma db push",
+    "dev": "npm run generate && nodemon src/index.ts",
+    "make:admin": "npm run generate && node prisma/make-admin.js",
+    "seed": "npm run generate && ts-node prisma/seed.ts",
     "setup": "npm run db:push && npm run seed",
     "start": "node dist/src/index.js",
     "typecheck": "tsc --noEmit",
-    "seed:demo": "ts-node prisma/demo.ts",
-    "test:security": "npm run build && node --test tests/security.test.cjs"
+    "seed:demo": "npm run generate && ts-node prisma/demo.ts",
+    "test:security": "npm run build && node --test tests/security.test.cjs",
+    "generate": "prisma generate"
   },
   "engines": {
     "node": ">=24"
@@ -22,7 +23,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "~6.19.3",
+    "@prisma/adapter-mariadb": "7.10.1",
+    "@prisma/client": "7.10.1",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -38,8 +40,13 @@
     "@types/multer": "^2.2.0",
     "@types/node": "^26.1.0",
     "nodemon": "^3.1.14",
-    "prisma": "~6.19.3",
+    "prisma": "7.10.1",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "nodemon": {
+      "minimatch": "^11.0.1"
+    }
   }
 }

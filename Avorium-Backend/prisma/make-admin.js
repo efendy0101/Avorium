@@ -1,8 +1,9 @@
 require('dotenv/config');
 
 const { PrismaClient } = require('@prisma/client');
+const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaMariaDb(process.env.DATABASE_URL) });
 
 async function main() {
   const email = process.argv[2]?.trim().toLowerCase();

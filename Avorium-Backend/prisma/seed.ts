@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../src/prisma';
 
-const prisma = new PrismaClient();
+
 
 const FISHING_GEAR_CATEGORIES = [
   {

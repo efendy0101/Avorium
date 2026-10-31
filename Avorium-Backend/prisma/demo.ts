@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../src/prisma';
 import bcrypt from 'bcrypt';
-const prisma = new PrismaClient();
+
 async function main() {
   const db = new URL(process.env.DATABASE_URL || '');
   if (!['localhost', '127.0.0.1', '::1', '[::1]'].includes(db.hostname)) throw new Error('Demo verileri yalnızca yerel veritabanına yüklenebilir.');
